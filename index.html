@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Publishing Documents with Pillar 7.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Highlight js -->
+    <link rel="stylesheet" href="_support/html/highlightjs/styles/default.css">
+    <link rel="stylesheet" href="_support/html/css/highlight-commands.css">
+    <script src="_support/html/highlightjs/highlight.pack.js"></script>
+    <script src="_support/html/js/highlight-commands.js"></script>
+
+    <!-- Bootstrap -->
+    <link href="_support/html/css/bootstrap.min.css" rel="stylesheet">
+    <link href="_support/html/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="_support/html/css/square-braket-associates.css" rel="stylesheet">
+    <style>
+/*        .container { max-width: 55em; } */
+    </style>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+    <div class="container text-justify">
+      <section>
+        <h1>Publishing Documents with Pillar 7.0</h1>
+        <div class="attribution">Stéphane Ducasse and Guillermo Polito and Asbath Sama</div>
+
+        <p>
+The current document is a little tutorial to show you how to begin with the creation of booklet. It describes the installation, customisation and integration with travis and bintray online services. From that perspective it can be mapped to other integration services. 
+</p>
+<p>
+We will use bintray to store the latest pdf produced by travis and we will use github to store the released pdf.
+</p>
+<h2>About Pillar </h2>
+
+<p>
+Pillar is a system to manage documents (books, presentations, web sites). It is able to emit resulting documents in multiple formats (html, markdown, latex, AsciiDoc). 
+It is composed of several modules such as importers, transformers, document model and outputers.
+</p>
+<p>
+This book describes Pillar in its current version 7.0. Pillar is currently developed and maintained by Stéphane Ducasse and Guillermo Polito.
+The original author of Pillar was Damien Cassou. Many people have also contributed to Pillar: Ben Coman, Guillermo Polito, Lukas Renggli (original author of Pier from which a first version of Pillar has been extracted), Benjamin van Ryseghem, Cyril Ferlicot-Delbecque, Thibault Arloing and Yann Dubois.
+</p>
+<p>
+This book adapts, extends, clarifies the chapter explaining Pillar in the <em>Enterprise Pharo: a Web Perspective</em> book.
+</p>
+<p>
+Pillar was sponsored by <a href="http://www.esug.org">ESUG</a>.
+</p>
+
+
+<h3>Introduction</h3>
+<p>
+Pillar (hosted at <a href="http://github.com/pillar-markup">http://github.com/pillar-markup</a>) is a markup language and associated tools to write and generate documentation, books (such as this one), web sites, and slide-based presentations. The Pillar screenshot in Figure <a href="#voyageDocExample"></a> shows the HTML version of chapter Voyage.
+</p>
+<p>
+<a id="voyageDocExample"></a>
+<figure>
+	<img src="Chapters/figures/voyageDocExample-small.png" width="60%" id="voyageDocExample" alt="An example Pillar output"/>
+	<figcaption>An example Pillar output</figcaption>
+</figure>
+</p>
+<p>
+Pillar has many features, helpful tools, and documentation:
+</p><ul>
+<li>simple markup syntax with references, tables, pictures, captions, syntax-highlighted code blocks;</li>
+<li>export documents to HTML, LaTeX, Markdown, AsciiDoc, ePuB and Pillar itself, and presentations to Beamer and Deck.js;</li>
+<li>many tests with good coverage (94% with more than a 2100 executed tests), which are regularly run by a <a href="https://ci.inria.fr/pharo-contribution/job/Pillar">continuous integration job</a></li>
+<li>a command-line interface and dedicated plugins for several text editors: <a href="https://github.com/pillar-markup/pillar-mode">Emacs</a>, <a href="https://github.com/cdlm/vim-pillar">Vim</a>, <a href="https://github.com/Uko/Pillar.tmbundle">TextMate</a>, and <a href="https://github.com/Uko/language-pillar">Atom</a></li>
+<li>a cheat sheet (see Chapter <a href="#chacheat"></a>). </li>
+</ul>
+
+
+<h3>Pillar users</h3>
+<a id="pillarUSERS"></a>
+<p>
+This book was written in Pillar. If you want to see how Pillar is used, have a look at its source code (<a href="http://github.com/SquareBracketAssociates/">http://github.com/SquareBracketAssociates/</a>), or check the following other real-world projects:
+</p>
+<ul>
+<li>the Updated Pharo by Example book (<a href="https://github.com/SquareBracketAssociates/UpdatedPharoByExample">https://github.com/SquareBracketAssociates/UpdatedPharoByExample</a>),</li>
+<li>the Pharo MOOC - Massive open online course (<a href="https://github.com/SquareBracketAssociates/PharoMooc">https://github.com/SquareBracketAssociates/PharoMooc</a>,</li>
+<li>Any of the Pharo booklets (<a href="https://github.com/SquareBracketAssociates/Booklet-XXXX">https://github.com/SquareBracketAssociates/Booklet-XXXX</a>,</li>
+<li>the PillarHub open-access shared blog (<a href="http://pillarhub.pharocloud.com">http://pillarhub.pharocloud.com</a>).</li>
+</ul>
+
+
+<h3>Pillar 70 planned features</h3>
+
+<p>
+Pillar 70 saw some major refactorings and cleaning: it does not rely on Grease, Magritte and make use anymore. Still some issues will be implemented to reach the version 70 we envision. Here is a little list of features that we are working on or will soon:
+</p>
+<ul>
+<li>Incremental recompilation. Since we remove the use of make (so that Windows users can use Pillar) we should introduce a way to avoid to recompile complete book when just one chapter changed.</li>
+<li>Markdown syntax. </li>
+<li>Release of Ecstatic. Pillar supports the deployment of web sites named Ecstatic and we are working on a second version of Ecstatic.</li>
+<li>Better table support.</li>
+</ul>
+
+
+
+<h3>Conclusion</h3>
+<p>
+Pillar is still in active development: maintainers keep improving its implementation. The current version of Pillar is Pillar 70. This booklet only documents Pillar 70. This booklet will be synchronised with future enhancements. 
+</p>
+
+
+<h2>Installing Pillar and Creating a Booklet </h2>
+<a id="chagettingstarted"></a><p>
+In this part we will describe the complete setup. We will show how to install Pillar, create a book and version your document  in a git repository to version the booklet files. The example used for this is this booklet itself.
+The current installation refers to Pillar 70. 
+</p>
+<p>
+We take as hypothesis that you want to version your document on gihub but Pillar does not care about this. 
+Now in the next chapter we will explain how to use github service integration. Such services only work with github.
+</p>
+<h3>Installing Pillar</h3>
+<p>
+Installing pillar is simple. Now since Pillar can be used to generate different families of documents, once you download you should install the template you want to use. But let us get started!
+</p>
+<figure><pre><code>$ mkdir Pillar
+$ cd Pillar
+$ git clone git@github.com:pillar-markup/pillar.git -b newpipeline
+$ ./pillar/scripts/build.sh</code></pre><figcaption></figcaption></figure>
+
+<p>
+This will create a <code>build</code> directory in the working directory and build pillar in there. You can then proceed to install pillar where you want in your home directory. Here we place it as <code>.pillar</code> in our home directory.
+</p>
+<figure><pre><code>$ mv Pillar ~/.pillar</code></pre><figcaption></figcaption></figure>
+
+<p>
+Note that if you want to generate PDF you should have a running installation of LaTex. We will show in subsequent chapter that you 
+can setup a travis job to compile and generate the PDF for you on the Cloud.
+</p>
+<h3>Setting up your environment</h3>
+
+<p>
+Once you downloaded pillar and moved it to your home directory, then add that directory to the <code>PILLAR_HOME</code> and <code>HOME</code> environment variables, for example, by modifying your .bashrc with
+</p>
+<figure><pre><code>export PILLAR_HOME=&quot;$HOME/.pillar/build&quot;
+export PATH=&quot;$PATH:$PILLAR_HOME&quot;</code></pre><figcaption></figcaption></figure>
+
+<p>
+Now you should be able to create a booklet for example. 
+</p>
+<figure><pre><code>$ pillar archetype book
+$ pillar build pdf</code></pre><figcaption></figcaption></figure>
+
+<p>
+It will build a book in the folder <code>_result</code>. 
+</p>
+<h3>Creating your own versioned booklet</h3>
+
+<p>
+We imagine that you want to write a little booklet as the one you are currently reading and that this booklet will be stored on github. 
+</p>
+<h4>Cloning a git repository</h4>
+
+<p>
+Let us clone the repository which is empty right now.
+</p><figure><pre><code>git clone git@github.com:SquareBracketAssociates/Booklet-PublishingAPillarBooklet.git</code></pre><figcaption></figcaption></figure>
+
+<figure><pre><code>cd Booklet-PublishingAPillarBooklet</code></pre><figcaption></figcaption></figure>
+
+
+
+<h4>Selecting and Installing Book</h4>
+<p>
+Pillar come with several templates and you can define your own using mustache (see the book Entreprise Pharo: a Web perspective).
+By default Pillar offers the following templates:
+</p>
+<ul>
+<li>Book. This is the template used in recent Pharo books and booklets. </li>
+<li>Presentation. These are the beamer templates used for example in the Pharo mooc. </li>
+<li>Basic-latex. This template is good to generate basic reports. What is nice is that you do not need the latest version of latex packages. </li>
+<li>Welcome. This template is to teach how to build templates. </li>
+</ul>
+
+<p>
+To install a template you should indicate it to pillar using the archetype command as follows: 
+</p>
+<figure><pre><code>pillar archetype book</code></pre><figcaption></figcaption></figure>
+
+<p>
+Then you can compile the default template to check that it effectively worked. 
+</p>
+<figure><pre><code>pillar build pdf </code></pre><figcaption></figcaption></figure>
+
+<p>
+produces a book in the folder <code>_result</code>. Indeed the folder Chapters and figures contain some samples.
+</p>
+<h4>Versioning your book</h4>
+
+<p>
+Now to version simply you book you should version all the files except <code>_result</code>. 
+Later we will show you how to add travis and bintray support for automatic compilation so that you do not need to install locally LaTeX on your machine. 
+</p>
+<figure><pre><code>$ git add pillar.conf
+$ git add _support
+$ git add Chapters
+$ git add book.pillar</code></pre><figcaption></figcaption></figure>
+
+<h4>Adding a .gitignore</h4>
+
+<p>
+Not all the downloaded files are worth versionning. We suggest the following .gitignore configuration. 
+</p>
+<figure><pre><code>more .gitignore
+&gt;&gt;&gt;
+/_result/</code></pre><figcaption></figcaption></figure>
+
+<p>
+You can remove the folder figures and the chapter samples. 
+Now you are ready to commit your files. 
+</p>
+
+<h3>Adapting Pillar to your Book</h3>
+<p>
+Now we are ready to produce your own book. For this we edit some configuration files, in addition to edit some chapters. We focus on the configuration of files.
+</p>
+<p>
+You need to edit two files:
+</p><ul>
+<li>pillar.conf which defines all the concerns such as author name, book tile but also the book template.</li>
+<li>book.pillar which lists the chapters in order and is the place to add some glue text.</li>
+</ul>
+
+<h4>Editing pillar.conf </h4>
+
+<p>
+You can start to edit the file <code>pillar.conf</code>.
+The main points are:
+</p><ul>
+<li>title: </li>
+<li>attribution: Give the author of the booklet.</li>
+<li>chapters. Here you should give the list of the files. You can put them in separate folders or not. </li>
+</ul>
+
+<p>
+Here is the <code>pillar.conf</code> file of this booklet
+</p><figure><pre><code>{
+  &quot;title&quot;: &quot;Publishing a Pillar Booklet&quot;,
+  &quot;attribution&quot;: &quot;StéphaneDucasse&quot;,
+  &quot;series&quot;: &quot;Square Bracket tutorials&quot;,
+  &quot;keywords&quot;: &quot;project template, Pillar, Pharo, Smalltalk&quot;,
+  
+  &quot;outputDirectory&quot;: &quot;build&quot;,
+  &quot;mainDocument&quot;: &quot;book&quot;,
+  &quot;inputFile&quot;:&quot;book.pillar&quot;,
+  &quot;latexTemplate&quot;: &quot;_support/templates/main.latex.mustache&quot;,
+  &quot;latexChapterTemplate&quot;: &quot;_support/templates/chapter.latex.mustache&quot;,
+  &quot;htmlTemplate&quot;: &quot;_support/templates/html.mustache&quot;,
+  &quot;htmlChapterTemplate&quot;: &quot;_support/templates/html.mustache&quot;,
+  &quot;newLine&quot;: #unix,
+  &quot;latexWriter&quot;: #'latex:sbabook',
+  &quot;htmlWriter&quot;: #html
+}</code></pre><figcaption></figcaption></figure>
+
+<p class="todo">we should check if we really need outputDirectory: build?</p>
+<h4>Editing book.pillar</h4>
+<p>
+Now we will edit the file <code>book.pillar</code> (the file listed in <code> &quot;mainDocument&quot;: &quot;book&quot;</code> in the <code>pillar.conf</code> file).
+</p>
+<p>
+We can simply add text there and file to be included using the Pillar command ==${inputFile:nameOfTheFIle.pillar}$ as follows:
+</p><figure><pre><code>$ more book.pillar
+
+The current document is a little tutorial to show you how to begin with the creation of booklet.
+It describes the installation, customisation and integration with travis and bintray online services.
+${inputFile:Chapters/GettingStarted.pillar}$
+
+${inputFile:Chapters/TravisBintray.pillar}$</code></pre><figcaption></figcaption></figure>
+
+
+<h3>Conclusion</h3>
+
+<p>
+Now you are ready to write your document in Pillar and get them exported in PDF and HTML. 
+</p>
+
+<h2>Pillar core syntactic elements</h2>
+<a id="chawriting"></a>
+<p>
+In this Chapter we present the Pillar syntax. Have a look at the
+Chapter <a href="#chacheat"></a>: it contains a two pages summary. We use the current text as example, notice however, that some results may be different on other support like HTML because of different common practices (for example creating an anchor with the reference instead of a footnote for an external link).
+</p>
+<p>
+It is important to see that since Pillar is extensible, plugins may extend the default markup. The extension mechanisms
+allow one not to learn new syntax but just new tags and parameters as will present later.
+</p>
+<h3>Meta-Information</h3>
+
+<p>
+Meta-information of a particular file is written at the start of the file between curly braces using the STON syntax (a super set of JSON). A meta-information starts with a word between quotation marks acting as a key, is followed by a colon <code>:</code>, and finishes with a value.
+</p>
+<p>
+For example, the following Pillar file,
+</p>
+<figure><pre><code class="pillar">{
+	&quot;title&quot;: &quot;A first document&quot;,
+	&quot;author&quot;: &quot;John Doe&quot;
+}
+
+!Hello World</code></pre><figcaption></figcaption></figure>
+
+<p>
+represents a Pillar document with the title and author set. You can use whatever keys you like. The metadata keys can be used in templates (see Chapter <a href="#templating"></a> for more information about templating).
+</p>
+<h3>Headings: Chapters &amp; sections</h3>
+<a id="chapterAndSections"></a>
+<p>
+A line starting with <code>!</code> represents a heading. Use multiple <code>!</code> to create sections and subsections.
+</p>
+<figure><pre><code>!!!Headings: Chapters &amp; Sections</code></pre><figcaption></figcaption></figure>
+
+<p>
+is the way the current section is created. The exporter and template may interpret the section the way they want (.i.e., for example outputing <code>subsection</code> instead of <code>section</code>).
+</p>
+<p>
+Some exporters support the possibility to specify a level of interpretation for <code>!</code>.
+<code>headingLevelOffset</code> controls how to convert from the level of a Pillar heading to the level of heading in your exported document.
+For example, a <code>headingLevelOffset</code> of 3 converts a 1st level Pillar heading to an <code>&lt;h4&gt;</code> in HTML.
+</p>
+<figure><pre><code>&quot;headingLevelOffset&quot; : 3</code></pre><figcaption></figcaption></figure>
+
+<h3>References and links</h3>
+
+<h4>Anchor definition</h4>
+<p>
+ To refer to a section or chapter, put an anchor (equivalent to <code>\label{chapterAndSections}</code> in LaTeX) using the <code>@chapterAndSections</code> syntax on a <em>separate line</em>. 
+ 
+</p><figure><pre><code>@chapterAndSections</code></pre><figcaption></figcaption></figure>
+<p>
+ 
+</p><h4>Anchor reference</h4>
+<p>
+When you want to refer to an anchor (equivalent to <code>\ref{chapterAndSections}</code> in LaTeX), use the <code>*@chapterAndSections*</code> syntax. Anchors are invisible and links will be rendered as: <a href="#chapterAndSections"></a>.
+</p>
+<figure><pre><code>*@chapterAndSections*</code></pre><figcaption></figcaption></figure>
+
+<h4>Alias</h4>
+
+<p>
+You can create alias for links. Tthis is especially adapted for web sites containing reference to other pages.
+</p>
+<figure><pre><code>*Chapters&gt;chapterAndSections*</code></pre><figcaption></figcaption></figure>
+
+<p>
+creates the link <a href="">Chapters</a>. Again the template may interpret this differently than a LaTeX footnote.
+</p>
+<p>
+To create a link to another pillar file, use the <code>*Alias&gt;File.pillar@AnchorName*</code>. The alias and anchor parts are optional but you will need them in some cases (for example if you have an inter-file link and you export in LaTeX, or if you have an inter-file link and you export all your file in the same html file).
+</p>
+<h4>External links</h4>
+
+<p>
+To create links to external resources, use the <code>*Pharo&gt;http://pharo.org/*</code> syntax which is rendered as <a href="http://pharo.org/">Pharo</a>. 
+</p>
+<figure><pre><code>*http://www.pharo.org*</code></pre><figcaption></figcaption></figure>
+
+<p>
+The same syntax can also represent email addresses: write <code>*dupond@free.fr*</code> to get <a href="mailto:dupond@free.fr">dupond@free.fr</a>.
+</p>
+
+<h3>Lists</h3>
+<p>
+Pillar offers three default lists: Bullet, numbered and labelled. 
+</p>
+<h4>Bulleted lists</h4>
+
+<figure><pre><code class="pillar">-A block of lines,
+-where each line starts with ==-==
+-is transformed to a bulleted list</code></pre><figcaption></figcaption></figure>
+
+<p>
+generates
+</p>
+<ul>
+<li>A block of lines,</li>
+<li>where each line starts with <code>-</code></li>
+<li>is transformed to a bulleted list</li>
+</ul>
+
+<h4>Numbered lists</h4>
+
+<figure><pre><code class="pillar">#A block of lines,
+#where each line starts with ==#==
+#is transformed to a numbered list</code></pre><figcaption></figcaption></figure>
+
+<p>
+generates
+</p>
+<ol><li>A block of lines,</li>
+<li>where each line starts with <code>#</code></li>
+<li>is transformed to a numbered list</li>
+</ol>
+
+<h4>Definition lists</h4>
+
+<p>
+Definition lists (<em>aka.</em> description lists) are lists with labels:
+</p>
+<figure><pre><code class="pillar">;blue.
+:color of the sky
+;red.
+:color of the fire</code></pre><figcaption></figcaption></figure>
+
+<p>
+generates
+</p>
+<dl><dt>blue.</dt>
+<dd>color of the sky</dd>
+<dt>red.</dt>
+<dd>color of the fire</dd>
+</dl>
+
+<h4>List nesting</h4>
+
+<figure><pre><code class="pillar">-Lists can also be nested.
+-#Thus, a line starting with ==-#==
+-#is an element of an unordered list that is part of an ordered list.</code></pre><figcaption></figcaption></figure>
+
+<p>
+generates
+</p>
+<ul>
+<li>Lists can also be nested.<ol><li>Thus, a line starting with <code>-#</code></li>
+<li>is an element of a bulleted list that is part of an ordered list.</li>
+</ol>
+</li>
+</ul>
+
+<h3>Commented lines</h3>
+
+<p>
+Lines that start with a <code>%</code> are considered comments and will not be rendered in the resulting document.
+</p>
+<h3>Escaping characters</h3>
+
+<p>
+Special characters (e.g., <code>+</code> and <code>*</code>) must be escaped with a backslash: to get a <code>+</code>, you actually have to write <code>\+</code>. The list of characters to escape is:
+</p>
+<figure><pre><code>| characters |
+characters := (PRPillarGrammar markups inject: Set new into: [ :chars :markup | chars addAll: markup. chars]) copyWithout: Character space.
+stream nextPutAll: '[[['; cr.
+characters do: [:char | stream nextPut: char] separatedBy: [ stream nextPutAll: ', ' ].
+stream cr; nextPutAll: ']]]'; cr.</code></pre><figcaption></figcaption></figure>
+
+
+<h3>Formatting</h3>
+<p>
+There is some syntax for text formatting:
+</p>
+<ul>
+<li>To make something <strong>bold</strong>, write <code>&quot;&quot;bold&quot;&quot;</code> (with 2 double quotes)</li>
+<li>To make something <em>italic</em>, write <code>''italic''</code> (with 2 single quotes)</li>
+<li>To make something <code>monospaced</code>, write <code>==monospaced==</code></li>
+<li>To make something <s>strikethrough</s>, write <code>--strikethrough--</code></li>
+<li>To make something <sub>subscript</sub>, write <code>@@subscript@@</code></li>
+<li>To make something <sup>superscript</sup>, write <code>^^superscript^^</code></li>
+<li>To make something <u>underlined</u>, write <code>__underlined__</code></li>
+</ul>
+
+
+<h3>Pictures</h3>
+<p>
+To include a picture, use the syntax <code>+caption&gt;file://filename|parameters+</code>:
+</p>
+<figure><pre><code class="pillar">+Caption of the picture.&gt;file://figures/pharo-logo.png|width=50|label=pharoLogo+</code></pre><figcaption></figcaption></figure>
+
+<p>
+generates Figure <a href="#pharoLogo"></a> (this reference has been generated using <code>*@pharoLogo*</code>).
+</p>
+<p>
+Parameters are pairs <code>&quot;label&quot;=&quot;value&quot;</code> separated by <code>|</code>.
+</p>
+<p>
+<a id="pharoLogo"></a>
+<figure>
+	<img src="Chapters/figures/pharo-logo.png" width="50%" id="pharoLogo" alt="Caption of the picture."/>
+	<figcaption>Caption of the picture.</figcaption>
+</figure>
+</p>
+
+<h3>Tables</h3>
+<p>
+To create a table, start the lines with <code>|</code> and separate the elements with <code>|</code>. Each new line represents a new row of the table. Add a single <code>!</code> to let the cell become a table heading.
+</p>
+<figure><pre><code class="pillar">|!Country |!Capital
+|France | Paris
+|Belgium | Brussels</code></pre><figcaption></figcaption></figure>
+
+<table style="border: solid thin"><tr><th>Country</th>
+<th>Capital</th>
+</tr>
+<tr><td>France</td>
+<td>Paris</td>
+</tr>
+<tr><td>Belgium</td>
+<td>Brussels</td>
+</tr>
+</table>
+
+
+<p>
+The contents of cells can be aligned left, centered or aligned right by using <code>|{</code>, <code>||</code> or <code>|}</code> respectively.
+</p>
+<figure><pre><code class="pillar">||centered||!centered header||centered
+|{ left |} right || center</code></pre><figcaption></figcaption></figure>
+
+<p>
+generates:
+</p>
+<table style="border: solid thin"><tr><td style="text-align: center">centered</td>
+<th style="text-align: center">centered header</th>
+<td style="text-align: center">centered</td>
+</tr>
+<tr><td style="text-align: left">left</td>
+<td style="text-align: right">right</td>
+<td style="text-align: center">center</td>
+</tr>
+</table>
+
+
+
+<h3>Preformatted</h3>
+<p>
+To create a preformatted block, begin each line with <code>=</code>. A preformatted block uses equally spaced text so that spacing is preserved. In general you should prefer code block over preformatted blocks. Code blocks more powerful. 
+</p>
+<pre>= this is preformatted text
+= this line as well</pre>
+<h3>Code block</h3>
+<a id="scripts"></a>
+<p>
+Use code blocks when you want to add code snippets to your document.
+Code blocks are delimited by <code>[[[</code> and <code>]]]</code>.
+</p>
+<pre>[[[
+foo bar
+]]]</pre>
+<p>
+generates
+</p>
+<figure><pre><code>foo bar</code></pre><figcaption></figcaption></figure>
+
+<h4>Code block with a label or caption</h4>
+
+<p>
+If you want either a label (to reference the code later) or a caption (to give a nice title to the code block), write the following:
+</p>
+<pre>[[[label=foobar|caption=My code block that works|language=smalltalk
+self foo bar
+]]]</pre>
+<p>
+which produces script <a href="#foobar"></a> (this reference is produced with <code>*@foobar*</code>).
+</p>
+<figure><pre><code class="smalltalk">self foo bar</code></pre><figcaption><a id="foobar"></a>My code block that works</figcaption></figure>
+
+<h4>Code block syntax highlighting</h4>
+<a id="sec:syntaxHighlighting"></a>
+<p>
+To specify the syntax a code block is written in, you need to use the <code>language</code> parameter.
+For example on <a href="#foobar"></a> we used the <code>smalltalk</code> value for the <code>language</code> parameter.
+</p>
+
+<figure><pre><code>| languages |
+stream nextPutAll: '@@note The currently supported languages are '.
+languages := PRRealScriptLanguage withAllConcreteClasses collect: #standardName.
+languages asStringOn: stream delimiter: ', ' last: ' and '</code></pre><figcaption></figcaption></figure>
+
+<p>
+If you don't want syntax highlighting for a particular script, specify <code>no language</code> as value to the <code>language</code> parameter.
+</p>
+<h4>Code block with line numbers</h4>
+
+<p>
+If you need to explain a long piece of code, you may want a code block to have line numbers:
+</p>
+<pre>[[[lineNumber=true
+self foo bar.
+self bar foo.
+]]]</pre>
+<p>
+produces
+</p>
+<figure><pre><code>self foo bar.
+self bar foo.</code></pre><figcaption></figcaption></figure>
+
+<h4>Code block from an external file</h4>
+
+<p>
+If you want you can also include a code block from a external file. For example if you have a file `myProject.html` and you want to take the code from line 15 to
+line 45, instead of copy/pasting the code you can use:
+</p>
+<pre>[[[language=html|fromFile=myProject.html|firstLine=15|lastLine=45
+]]]</pre>
+<p>
+The <code>firstLine</code> and <code>lastLine</code> parameters are optional.
+</p>
+
+
+
+<h4>Generate a part of your document with a script</h4>
+
+<p>
+If you want you can also evaluate a script to generate a part of your document.
+Notice that some pillar version may disable it for security reasons.
+</p>
+<p>
+For example if you write a project's documentation and want to give some metrics about its code, you can write something like this:
+</p>
+<pre>[[[eval=true
+| packages classes |
+packages := RPackageOrganizer default packages select: [ :each |
+               each name includesSubstring: 'Pillar' ].
+classes := packages flatCollect: [ :each | each classes ].
+stream
+   nextPutAll: 'The Pillar project contains:';
+   lf;
+   nextPutAll: '- ==';
+   print: packages size;
+   nextPutAll: ' packages==.';
+   lf;
+   nextPutAll: '- ==';
+   print: classes size;
+   nextPutAll: ' classes=='.
+]]]</pre>
+<p>
+will generate:
+</p>
+<figure><pre><code>| packages classes |
+packages := (RPackageOrganizer default packages select: [ :each | each name includesSubstring: 'Pillar' ] ).
+classes := packages flatCollect: [ :each | each classes ].
+stream
+   nextPutAll: 'The Pillar project contains:';
+   lf;
+   nextPutAll: '- ==';
+   print: packages size;
+   nextPutAll: ' packages==.';
+   lf;
+   nextPutAll: '- ==';
+   print: classes size;
+   nextPutAll: ' classes=='.</code></pre><figcaption></figcaption></figure>
+
+<h3>Annotated paragraphs</h3>
+
+<p>
+An empty line starts a new paragraph.
+</p>
+<p>
+An annotated paragraph starts with <code>@@</code> followed by a keyword such as <code>todo</code> and <code>note</code>. For example,
+</p>
+<figure><pre><code class="pillar">@@note this is a note annotation.</code></pre><figcaption></figcaption></figure>
+
+<p>
+generates
+</p>
+<p class="note">this is a note annotation.</p>
+<p>
+And,
+</p>
+<figure><pre><code class="pillar">@@todo this is a todo annotation</code></pre><figcaption></figcaption></figure>
+
+<p>
+generates a todo annotation
+</p>
+<p class="todo">this is a todo annotation</p>
+<p>
+By default the templates support <code>@@todo</code> and <code>@@note</code>. 
+</p>
+
+<h4>Nice HTML</h4>
+<p>
+Note that the annotation (e.g., <code>todo</code> and <code>note</code>) can be any word that is meaningful to the author. In HTML, an annotated paragraph triggers the generation of a paragraph with the annotation as the paragraph <code>class</code>. In LaTeX, an environment with the annotation name is generated. In HTML, you can tweak the output to make it look nice, for example with such JavaScript code:
+</p>
+<figure><pre><code class="javascript">// Wraps paragraphs with class pClass inside a div and adds an H4 element with pTitle.
+function transformAnnotatedParagraphs(pClass, pTitle) {
+   $(&quot;p.&quot; + pClass).wrap( &quot;&lt;div class='annotated-paragraph &quot;
+         + pClass + &quot;' /&gt;&quot; ).prepend(&quot;&lt;h4&gt;&quot;+ pTitle +&quot;&lt;/h4&gt;&quot;);
+}
+
+transformAnnotatedParagraphs(&quot;note&quot;, &quot;Note&quot;);
+transformAnnotatedParagraphs(&quot;todo&quot;, &quot;To do&quot;);</code></pre><figcaption></figcaption></figure>
+
+<p>
+Above code will prepend the titles &quot;Note&quot; and &quot;To do&quot; to the <code>@@note</code> and <code>@@todo</code> paragraphs. You can make that looks nice using a little bit of CSS:
+</p>
+<figure><pre><code class="css">.annotated-paragraph {
+   margin: 20px 0;
+   padding: 15px 30px 15px 15px;
+   border-left: 5px solid #eee;
+}
+.annotated-paragraph h4 {
+   margin-top: 0;
+}
+.annotated-paragraph p:last-child {
+   margin-bottom: 0;
+}
+.note {
+   background-color: #f0f7fd;
+   border-color: #d0e3f0;
+}
+.note h4 {
+   color: #3a87ad;
+}
+.todo {
+   background-color: #dff0d8;
+   border-color: #d6e9c6;
+}
+.todo h4 {
+   color: #3c763d;
+}</code></pre><figcaption></figcaption></figure>
+
+
+
+<h3>Raw</h3>
+
+<p>
+If you want to include raw text into a page you must enclose it between <code>{{{</code> and <code>}}}</code>, otherwise Pillar ensures that text appears as you type it which might require transformations.
+</p>
+<p>
+A good practice is to always specify for which kind of export the raw text must be outputted by starting the block with <code>{{{latex:</code> or <code>{{{html:</code>. For example, the following shows a formula, either using LaTeX or plain text depending on the kind of export.
+</p>
+<pre>{{{latex:
+\begin{equation}
+   \label{eq:1}
+   \frac{1+\sqrt{2}}{2}
+\end{equation}
+}}}
+{{{html:
+(1+sqrt(2)) / 2
+}}}</pre>
+<p>
+<strong>Take care:</strong> Avoid terminating the verbatim text with a <code>}</code> as
+this will confuse the parser, better add a space or two. So, don't write <code>{{{\begin{scriptsize}}}}</code> but <code>{{{\begin{scriptsize} }}}</code> instead.
+</p>
+
+
+<h3>Annotations: supporting extensions</h3>
+
+<p>
+Pillar proposes two extensions mechanisms: tags and parameters. Pay attention that each plugin should handle the tag or parameter processing. 
+</p>
+
+<p>
+Annotations are the Pillar way to have extensible syntax. An annotation has this syntax:
+</p>
+<figure><pre><code class="pillar">${tag:parameter=value|parameter2=value2}$</code></pre><figcaption></figcaption></figure>
+
+<h4>InputFile annotation</h4>
+
+<p>
+You can include a file into another pillar file. The <code>inputFile</code> annotation takes as parameter the path of the file relative to <code>baseDirectory</code> (if you don't change the base directory, it is your working directory). In this example, 2 files are included:
+</p>
+<figure><pre><code class="pillar">${inputFile:test.pillar}$
+
+${inputFile:chapter2/chapter2.pillar}$</code></pre><figcaption></figcaption></figure>
+
+<h4>Footnote annotation</h4>
+
+<p>
+You can add footnotes to explain or annotate words. The <code>footnote</code> annotation takes as parameter the note which will appear at the end of the document. In this example, one footnote is added.
+</p>
+<figure><pre><code>Foo${footnote:Some Explanation for Foo}$</code></pre><figcaption></figcaption></figure>
+
+<h4>Parameters</h4>
+
+<p>
+Pictures and scripts are both using parameters to specify different options and variations. Parameters are pairs <code>&quot;label&quot;=&quot;value&quot;</code> separated by <code>|</code>.
+</p>
+<p>
+Here are two examples within the same expressions: Code blocks and captions use parameters.
+</p>
+<pre>[[[label=foobar|caption=My code block that works|language=pillar
++Caption of the picture.&gt;file://figures/pharo-logo.png|width=50|label=pharoLogo+
+]]]</pre>
+
+
+<h2>Specific markup</h2>
+<p>
+This chapter presents extensions specific to a given support such as LaTeX or slides.
+</p>
+<h3>LaTeX</h3>
+
+<h4>Citations</h4>
+
+<p>
+Citations are only available for LaTeX.
+You can add citations to your document to reference an element in a LaTeX bibliography. The <code>cite</code> annotationtakes as parameter the key of the reference in the bibliography.
+</p>
+<figure><pre><code>${cite:reference}$</code></pre><figcaption></figcaption></figure>
+
+<p>
+The exemple above wil render as <code>cite{reference}</code>
+</p>
+<p>
+If you want to use other type of citations like <code>citep</code> or <code>citet</code>, please overwrite the command in your LaTeX template:
+<code>renewcommand{cite}{citep}</code>
+</p>
+<p>
+Future versions will support also the definition in pillar.conf of the bibliography file. Right now you should harcode it in the template. 
+</p>
+
+<h3>Slides</h3>
+<p>
+Pillar offers the possibility to define slides. Slides requires the use of the presentation archetype. 
+</p>
+<h4>Slide annotation</h4>
+<a id="sec:slide"></a>
+<p>
+This annotation is used to create slides structure for a <code>beamer</code> or a <code>deck.js</code> export.
+The parameter <strong>title</strong> is required.
+The <strong>label</strong> parameter can be used to refer to this slide in another slide:
+</p>
+<figure><pre><code class="pillar">${slide:title=My slide|label=sld:mySlide}$</code></pre><figcaption></figcaption></figure>
+
+<h4>Columns</h4>
+
+<p>
+With Pillar you can put text and other contents in columns.
+To do that, you need to delimit an environment with the <code>columns</code> and <code>endColumns</code> annotations.
+Then you can create columns with the <code>column</code> annotation.
+The column annotation takes 1 required parameter: the width of the column. Here is an example:
+</p>
+<figure><pre><code class="pillar">${columns}$
+
+   ${column:width=60}$
+      bla
+   ${column:40}$
+      bla
+
+${endColumns}$</code></pre><figcaption></figcaption></figure>
+
+<p class="note">The column annotations currently works only for the beamer, HTML and Deck.js export.</p>
+
+<h3>Under development</h3>
+
+<h4>Semantic links</h4>
+
+<p>
+Semantic links are a way to simplify links to standard websites such as Wikipedia and Youtube.
+</p>
+<p>
+To create semantic links ressources, use the <code>*Wikipedia Pharo&gt;wikipedia:Pharo*</code> syntax which is rendered as <a href="https://en.wikipedia.org/wiki/Pharo">Wikipedia Pharo</a>.
+To specify a language, you can use the <code>*Wikipedia Pharo&gt;wikipedia:Pharo|lang=en*</code> syntax which is rendered as <a href="https://en.wikipedia.org/wiki/Pharo">Wikipedia Pharo</a>.
+</p>
+<p>
+Same for Youtube links : <code>*Youtube Pharo&gt;youtube:KDvNuOjdjY4*</code>, the result is : <a href="https://www.youtube.com/watch?v=KDvNuOjdjY4">Youtube Pharo</a>.
+</p>
+<p>
+Note that such feature will be probably revised to be more generic and let the user define other semantic links. 
+</p>
+<h4>Structures</h4>
+
+<p>
+You can create structures to render all structures with the same name as the same object.
+Structures use the scripts syntax (see <a href="#scripts"></a>) with a particular parameter <code>structure</code>
+</p>
+<pre>[[[structure=exercise
+{
+  &quot;question&quot;:&quot;What is the answer to life, the universe and everything ?&quot;,
+  &quot;answer&quot;:&quot;42&quot;
+}
+]]]</pre>
+<p>
+There is two kind of structures for the moment:
+</p><ul>
+<li>exercise, rendered as a definition list</li>
+<li>city, rendered as a table</li>
+<li>country, rendered as a table</li>
+</ul>
+
+
+
+
+<h2>Templates (draft)</h2>
+
+<a id="chausingtemplate"></a>
+<p>
+As we showed in the Chapter <a href="#chagettingstarted"></a>, an archetype is a project skeleton that packages together a template, pillar configuration and an example.
+</p>
+<p>
+Basically you have:
+</p><ul>
+<li>pillar.conf</li>
+<li>templates</li>
+<li>... with some differences between archetypes</li>
+</ul>
+
+<p>
+To install a new archetype, launch this command :
+</p>
+<figure><pre><code class="bash">./pillar archetype &lt;archetypeName&gt;</code></pre><figcaption></figcaption></figure>
+
+<p>
+By default Pillar offers the following templates 
+</p><ul>
+<li>Book. This is the template used in recent Pharo books and booklets. </li>
+<li>Presentation. These are the beamer templates used for example in the Pharo mooc. </li>
+<li>Basic-latex. This template is good to generate basic reports. What is nice is that you do not need the latest version of latex packages. </li>
+<li>Welcome. This template is to teach how to build templates. </li>
+</ul>
+
+<p>
+In this chapter we will explain how to define archetypes but first templates, since an archetype is mainly a template example.
+</p>
+<h3>A document</h3>
+<p>
+Imagine that we have a pillar file name <code>MyDocument.pillar</code>.
+</p>
+<figure><pre><code>! Hello from Pillar</code></pre><figcaption></figcaption></figure>
+
+
+<p>
+[[[
+</p>
+<p>
+]]]
+</p>
+
+<h3>A template (update)</h3>
+<a id="templating"></a>
+<p>
+Pillar uses Mustache templating engine. Templates are filled in using Mustache (See the Mustache Chapter in <em>Enterprise Pharo: a Web Perspective</em> available at <a href="http://books.pharo.org">http://books.pharo.org</a>).
+</p>
+<p>
+Here is an example HTML template using Mustache:
+</p>
+<figure><pre><code class="html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+   &lt;head&gt;
+      &lt;title&gt;{{{title}}}&lt;/title&gt;
+   &lt;/head&gt;
+   &lt;body&gt;
+      &lt;div class=&quot;container&quot;&gt;
+         {{{content}}}
+      &lt;/div&gt;
+   &lt;/body&gt;
+&lt;/html&gt;</code></pre><figcaption></figcaption></figure>
+
+<p>
+In this example, we can see the use of <code>{{{title}}}</code> and <code>{{{content}}}</code> to refer to the title of the document and its actual content (the one
+exported from Pillar). You have to put such a template in a dedicated file (named <code>chapter.html.template</code> for example) and refers this file from the
+config file or in your pillar document. 
+When you will compile to HTML, Pillar will use this template.
+</p>
+
+<h3>A Configuration (udpate)</h3>
+
+<p>
+We should be able to produce something without a configuration!
+</p>
+
+
+
+<p>
+You can also use <code>mustache</code> alone with command:
+</p>
+<figure><pre><code class="bash">@@TOBEUPDATED ./mustache --data=file.html.json --template=myhtml.template &gt; file.html</code></pre><figcaption></figcaption></figure>
+
+
+
+
+<h3>Configuring your output</h3>
+
+<a id="configuring"></a>
+<p>
+In this section we show how to configure the export.
+</p>
+<h4>Configuration File</h4>
+
+<p>
+Pillar exporting mechanism can be configured using <a href="http://smalltalkhub.com/#!/~SvenVanCaekenberghe/STON">STON</a> (see corresponding chapter In Enterprise Pharo: a Web Perspective), a lightweight, text-based, human-readable data interchange format (similar to the popular JSON). Configuration is done either in <code>pillar.conf</code> or at the beginning of Pillar files.
+</p>
+<h4>Configuration Parameters</h4>
+<a id="configParameters"></a>
+<figure><pre><code>CCDocumentationGeneration of: PRPillarConfiguration on: stream.</code></pre><figcaption></figcaption></figure>
+
+
+<h3>Command-Line Interface</h3>
+<a id="commandLineInterface"></a>
+<p>
+In this section we show how to use the Pillar command-line interface.
+</p>
+<p>
+One of the basic uses of the command line is:
+</p>
+<figure><pre><code class="bash">$ ./pillar export --to=latex PharoSound.pillar</code></pre><figcaption></figcaption></figure>
+
+<figure><pre><code>stream nextPutAll: 'You can select an export type with the parameter ==-\-to==. The possible exports are: '.
+(PRDocumentWriter withAllConcreteClasses collect: #writerName) asStringOn: stream delimiter: ', ' last: ' and '.
+stream nextPutAll: '.'</code></pre><figcaption></figcaption></figure>
+
+<p>
+The <code>Makefile</code> will create a symbolic link named <code>root</code> referencing the output directory into each directory containing output files.
+You can use this symbolic link to reference files in specified in the <code>support</code> collection.
+</p>
+
+
+
+
+
+
+<h2>Pillar from Pharo (To be updated)</h2>
+
+<a id="chapillarpharo"></a>
+<p>
+Pillar has a document model (the root of which being <code>PRDocument</code>), a parser (<code>PRPillarParser</code>) and several export types (subclasses of <code>PRDocumentWriter</code>) implemented as visitors over the document model. Pillar also has phases (subclasses of <code>PRPhase</code>) that take a document model as input and produce a modified document model as output.
+</p>
+<p class="todo">update this with the architecture</p>
+<p>
+In this chapter we will show you also that Pillar can be directed edited in Pharo itself. Then we will show some points to code Pillar directly. 
+</p>
+<h3>Preview: Editing Pillar with GT Bloc</h3>
+
+<p>
+The team developing Bloc is currently working on an editor for Pillar directly in Pharo. To put it in perspective, let us take a look at one screenshot showing an inspector presentation containing a Brick editor opened on a Pillar file that includes some text, a code snippet and a reference to a picture:
+</p>
+
+<p>
+<a id="pharoLogo"></a>
+<figure>
+	<img src="Chapters/figures/pharo-logo.png" width="50%" id="pharoLogo" alt="Caption."/>
+	<figcaption>Caption.</figcaption>
+</figure>
+</p>
+<p>
+But, the more interesting thing is that below the picture reference, we get to see the actual picture (which happens to be another inspector screenshot). In fact, this picture is actually just another text attribute (called an adornment) that can be dynamically added to any text elements. This opens up a whole lot of expression power and it is all easily composeable. This is another reason why we say that this editor is moldable and you should expect new applications making use of this moldability and combining it with the liveliness of Pharo.
+</p>
+
+<p>
+The latest Brick code is loadable through:
+</p>
+<figure><pre><code>	Metacello new
+		baseline: 'Brick';
+		repository: 'github://pharo-graphics/Brick/src';
+		load: #development.</code></pre><figcaption></figcaption></figure>
+
+<p>
+If you want to play with Pillar, load the following extra code and just inspect a Pillar file:
+</p>
+<figure><pre><code>	((IceRepository registry detect: [ :each | each name = 'Brick' ])
+		packageNamed: 'Brick-Editor-Pillar') loadLatest.</code></pre><figcaption></figcaption></figure>
+
+<p>
+There are still issues left to deal with. But, the most important challenges are now behind us and that the design of the editor code is stable and robust.
+</p>
+<h3>How to create a Pillar document</h3>
+
+<p>
+It is possible to create a Pillar document by parsing a string or by instantiating the document model.
+</p>
+<p>
+Creating a document by parsing a <code>String</code> requires using the <code>PRPillarParser</code>:
+</p>
+<figure><pre><code>| wiki |
+wiki := '!My Document'.
+PRPillarParser parse: wiki</code></pre><figcaption></figcaption></figure>
+
+<p>
+Or from a file:
+</p><figure><pre><code>PRPillarParser parse: (FileSystem workingDirectory / 'foo.pillar') readStream</code></pre><figcaption></figcaption></figure>
+
+<p>
+You can also instantiate the document model, one node after the other, starting with <code>PRDocument</code> and adding sub-instances of <code>PRDocumentItem</code>:
+</p>
+<figure><pre><code>| document title figure|
+document := PRDocument new.
+title := PRHeader new
+   level: 1;
+   add: (PRText content: 'foo');
+   yourself.
+figure := PRFigure new
+   add: (PRText content: 'Alias');
+   reference: 'file://test.png';
+   yourself.
+document add: title; add: figure.</code></pre><figcaption></figcaption></figure>
+
+
+<h3>How to export a document</h3>
+
+<p>
+Once you have your document, you may want to export it. But exporting, there's an optional step: transforming your document.
+A transformer is an abstraction that visits a document and changes it by transforming nodes. For instance, <code>PRScriptEvaluator</code> replaces a script with <code>eval=true</code>
+ by the result of its evaluation. 
+ 
+ Exporting is done with a subclass of <code>PRDocumentWriter</code>, like this:
+</p>
+<figure><pre><code>PRHTMLWriter write: document</code></pre><figcaption></figcaption></figure>
+
+<p>
+To specify export parameters, you may want to use a configuration.
+</p>
+<figure><pre><code>| configuration |
+configuration := PRPillarConfiguration new.
+configuration outputType: PRHTMLWriter.
+PRExportPhase executeOn: { document } with: configuration.</code></pre><figcaption></figcaption></figure>
+
+
+
+<h2>Setting Up Travis </h2>
+
+<p>
+Travis is a service similar to Jenkins that is useful to automate your process.
+Once configured, a travis job will run each time you commit to your book github repository. This is what we will see now. 
+</p>
+<h3>Configuring your github account</h3>
+<p>
+The first to start with is to enable the travis integration from your github repository. You will find the integration in Settings and the menu integration services. You should look for Travis CI and enable it as shown in Figure <a href="#github"></a>.
+</p>
+<p>
+<a id="github"></a>
+<figure>
+	<img src="Chapters/figures/configuringServices.png" width="80%" id="github" alt="Enabling the travis service in your github account."/>
+	<figcaption>Enabling the travis service in your github account.</figcaption>
+</figure>
+</p>
+
+<p>
+Once this is done, you should go to your travis account <a href="http://travis-ci.com">http://travis-ci.com</a> and enable your project as shown in Figure <a href=""></a>. 
+</p>
+<p>
+<a id="traviside"></a>
+<figure>
+	<img src="Chapters/figures/travis.png" width="80%" id="traviside" alt="Enabling your github project on travis."/>
+	<figcaption>Enabling your github project on travis.</figcaption>
+</figure>
+</p>
+<p>
+Note that this setup may take a while to sync. So do not worry if these systems start to off right in the minute. It may take a while, so let us pass to the next item. 
+</p>
+<h3>Add and edit the .travis.yml file</h3>
+
+<p>
+Here is the <code>.travis.yml</code> of this booklet. You can find it online at <a href="https://github.com/SquareBracketAssociates/Booklet-PublishingAPillarBooklet">https://github.com/SquareBracketAssociates/Booklet-PublishingAPillarBooklet</a>:
+</p>
+<figure><pre><code>sudo: required
+services:
+- docker
+
+before_install:
+- docker pull dpollet/texlive:pillar
+
+script:
+- docker run --tty --rm --volume $PWD:/work dpollet/texlive:pillar make spiralbook</code></pre><figcaption></figcaption></figure>
+
+<p>
+Add a similar configuration file to your repository. Once the travis github get synchronised and travis is kicked in, you will be able to check on the travis log that your project has been successfully built. 
+</p>
+
+<h3>Some explanations</h3>
+<p>
+Let us explain some parts:
+</p>
+<figure><pre><code>sudo: required
+services:
+- docker
+
+before_install:
+- docker pull dpollet/texlive:pillar
+
+script:
+- docker run --tty --rm --volume $PWD:/work dpollet/texlive:pillar make spiralbook</code></pre><figcaption></figcaption></figure>
+
+<p>
+Our script uses the docker container containing an installed version of texlive and pillar. The script invokes make to build the book. <code>make spiralbook</code> builds the book in spiral lulu format. You may want to adapt it to other formats. 
+</p>
+<h3>Using badges to indicate build status</h3>
+
+<p>
+You can now use the status of a travis build right in the github repository using markdown badges in the project <code>README.md</code> file.
+</p>
+
+<figure><pre><code># A booklet explaining how to build a booklet 
+
+[![Build status][badge]][travis]
+
+[travis]: https://travis-ci.org/SquareBracketAssociates/Booklet-PublishingAPillarBooklet
+[badge]: https://travis-ci.org/SquareBracketAssociates/
+Booklet-PublishingAPillarBooklet.svg?branch=master
+
+## To contribute
+- Fork
+- Do pull Request 
+
+## To latex it locally
+
+```
+make
+make bootstrap
+make book spiral
+```</code></pre><figcaption></figcaption></figure>
+
+<p>
+At the stage you should get already important feedback since you will know if your project fully builds or not. 
+</p>
+<h2>Deploying your documents</h2>
+
+<p>
+In this chapter, we present two ways to deploy your documents: first your work in progress using bintray and second released versions using github.
+</p>
+<h3>Deploying your work in progresss artefacts in bintray</h3>
+
+<p>
+Bintray is a service that can host artefacts produced by Travis.
+We will use bintray to store the latest pdf produced by travis and we will use github to store the released (tagged) pdf.
+</p>
+<h4>Create a bintray account</h4>
+
+<p>
+You should have an account on bintray <a href="https://bintray.com/">https://bintray.com/</a>.
+You may link it or not to your github account.
+</p>
+<h4>Encoding your bintray API key for Travis</h4>
+
+<p>
+In your bintray profile, get your API key (copy it to your copy paste buffer). This is key is important because without it you will not be able to make Travis use Bintray. To be used in Travis it should be encrypted.
+</p>
+<p>
+Note that this encrypted key cannot be shared between different project, therefore it should be generated from the bintray API key for each new project. 
+</p>
+<p>
+In your machine in the folder of your project execute the following expressions:
+</p>
+<figure><pre><code>travis login --auto
+travis encrypt 'Your API Key from Bintray'</code></pre><figcaption></figcaption></figure>
+
+<p>
+You will use the resulting key in your .travis.yml configuration file.
+</p>
+<h4>Enable bintray</h4>
+
+<p>
+To enable bintray, we extend the <code>.travis.yml</code> description with the following section:
+</p>
+<figure><pre><code>deploy:
+- provider: bintray
+  file: .bintray.json
+  on:
+    repo: SquareBracketAssociates/Booklet-PublishingAPillarBooklet
+  skip_cleanup: true
+  user: ducasse
+  key:
+    secure: DLT5e+3+U3jaooTLVN6JPcavMS+5XzFwNIfsK7QLYefzOZfBR8lt2vHtX2OxcdyKNfuzh0EaIDUR9a6+/Eg/wAcxjFDEO94ftb7rD7YHJ1Tc7r4AaeKwrdwyL6VgbN0ZNZqtXsTWGg+4XgHvSq0KVAR9K1IKSwJYPWwjJwDexakY2/ZpRg6R0OgaZwhtTEbbUn/pnoVQl3VfNlCjiI+ZLDqPKf/UfovVv7tzqdHeLK73MJN36Ri8IGTP5QaSYHBBko8mTv4EoVH7HuuSLAa60NBOScksYY5LjsS7OdzIwipmk4xwxcp2QXtVjf2uNKCKIISVRMzesdmUnsuL/qReJh7pfn21a38ZEEjJPPWSnwA8iI+GHUiCcLuHdw1+ilmIqxF3w8gSunM3aUv4a/qQm641DpGPawnYBbnFGPyEkxpCB1HXIsRRJeBs2UEkFmhOHyGWGl0+jx3iihwe72HMKRYeXcDHKOn1gU+pJQ50PBXFsTotOr7wkZ6OGsKO0XecNsZGodsQ4lPVxfJolnKhkxIouzCagd3wO0iseG1vOyi5JrRT+NPsZp7TKBrHIDAUb0LG+F8qC/IXHhTYo7ZywF5ZjIV9UZo/kZP0EQ8pstUlD4V4DWRYV1KQSpORM01wpdcZFDb5ExLvEck6Sv1cuW9QYBst+lDVpoSpbXSnSDc=</code></pre><figcaption></figcaption></figure>
+
+<p>
+The deploy section indicates to use the file <code>.bintray.</code> as a specification to store the result of the build to the bintray repository for the account <code>ducasse</code> and this is there that you should paste your encrypted key.
+</p>
+<p>
+Note that the <code>skyp_cleanup: true</code> is a way to circumvent some strange behavior.
+</p>
+
+<h4>Add and edit the .bintray.json file </h4>
+<p>
+Now we should add a <code>.bintray.json</code> configuration file that you should version with your project.
+</p>
+<p>
+Here is the one of the <a href="https://github.com/SquareBracketAssociates/Booklet-PublishingAPillarBooklet">https://github.com/SquareBracketAssociates/Booklet-PublishingAPillarBooklet</a>
+</p>
+<figure><pre><code>more .bintray.json</code></pre><figcaption></figcaption></figure>
+
+<figure><pre><code>
+{
+  &quot;package&quot;: {
+      &quot;name&quot;: &quot;Booklet-PublishingABooklet&quot;,
+      &quot;repo&quot;: &quot;wip&quot;,
+      &quot;subject&quot;: &quot;squarebracketassociates&quot;,
+      &quot;desc&quot;: &quot;Distributing&quot;,
+      &quot;licenses&quot;: [&quot;MIT&quot;],
+      &quot;website_url&quot;: &quot;https://github.com/SquareBracketAssociates/Booklet-PublishingAPillarBooklet&quot;,
+      &quot;issue_tracker_url&quot;: &quot;https://github.com/SquareBracketAssociates/Booklet-PublishingAPillarBooklet/issues&quot;,
+      &quot;vcs_url&quot;: &quot;https://github.com/SquareBracketAssociates/Booklet-PublishingAPillarBooklet.git&quot;,
+      &quot;labels&quot;: [&quot;work-in-progress&quot;]
+    },
+
+    &quot;version&quot;: {
+        &quot;name&quot;: &quot;latest&quot;,
+        &quot;desc&quot;: &quot;Latest successful build&quot;
+    },
+
+    &quot;files&quot;: [
+        {
+            &quot;includePattern&quot;: &quot;build/(learningoop).pdf&quot;,
+            &quot;uploadPattern&quot;: &quot;$1-wip.pdf&quot;,
+            &quot;matrixParams&quot;: { &quot;override&quot;: 1 }
+        }
+    ],
+    &quot;publish&quot;: true
+}</code></pre><figcaption></figcaption></figure>
+
+<p>
+The most important is probably the files part. It lets you specify the files that you select in the build and how the files can be renamed when uploaded to bintray. <code>$1</code> denotes the part in <code>()</code>. 
+</p>
+<ul>
+<li><code>&quot;includePattern&quot;: &quot;build/(learningoop).pdf&quot;,</code> states that the file to grab is named learningoop.pdf and is found in the <code>build</code> folder. </li>
+<li><code>&quot;uploadPattern&quot;: &quot;$1-wip.pdf&quot;,</code> states that when the file will be uploaded to bintray we renaming it <code>learningoop-wip.pdf</code>.</li>
+</ul>
+
+<h4>Put a point to bintray in your README</h4>
+
+<p>
+Now it is also a good point to add a link to your bintray for example in your readme file. 
+Here is a possible version: 
+</p>
+<p>
+The result from the latest successful Travis build can be found [on Bintray (PDF)](https://bintray.com/squarebracketassociates/wip/download_file?file_path=learningoop-wip.pdf).
+</p>
+
+<h3>Github deployment </h3>
+
+<p>
+For a given checkout you should generate the associated token.
+In your github repository you should mention to travis that you will be interested by sotring releases files 
+in the github release tab. 
+</p>
+<figure><pre><code>&gt; travis setup releases</code></pre><figcaption></figcaption></figure>
+
+<p>
+Here is the full <code>.travis.yml</code> with the github integration: <code>-provider: releases</code>
+</p>
+<figure><pre><code>sudo: required
+services:
+- docker
+
+before_install:
+- docker pull dpollet/texlive:pillar
+
+script:
+- docker run --tty --rm --volume $PWD:/work dpollet/texlive:pillar make spiralbook
+
+deploy:
+- provider: bintray
+  file: .bintray.json
+  on:
+    repo: SquareBracketAssociates/LearningOOPWithPharo
+  skip_cleanup: true
+  user: ducasse
+  key:
+    secure: ThnjhD8OMRlL5NmsK8dGQR4mpzXG2Kj2NeWHA5oHCO4YTaK0fKLPHF8YcjlyQorESX6+Z/Q0ihtTq1/3GguH8rzjAS8DrgArB3Stcg6npfyB3svyeVWXTKP8EPLHtenBnLANWTj/tYfHd6egDltJlxGMrEd5tHzl8CNlD+mmfQA1VhXUEmh8pw8P6VfFDWiL+bHG/Am1DI8SspcuQbYcKzh6ZdadvXwpEfQr07VTc0w4zygRk6h8z+76wX8N7xebr66aLe9FipZ0d3dYYfhZl3mtsOoUJmvGpnsSYt3h3I9TnOTeZjGAUEfzxdoZ6CRMIExUhNU7VEBMN4FKP8Oic8Eu1i/Ay7cM74mwGgJCX8DE0M/y0DJqJoKEk+NojoZfSgSzwslE1hXSZSaAJoTr9EDkZwEpVDCep42TVZyOYa+GICZCWpO999KYZlm8ItD4EJsqu8s2pipEMmcLGbGDBejuQ/30NRvelNG6xcT0wTg4595zNuP4k9cOYG9RddlqDzy8E333oz+cJ2R9zolsQpNHZtsQvKvbamRt0fsKjOgGv/a4Wslp1ZczWezRbBCxWC8wvtYSn1MWraQUGh6E3OrljoplbgUmOY/XLsAJeeFxIAmOwUzo2PK5S43nEhKQQNr/CmP4TAL9P3wbsBhQ/WXa4f8lUSeexDzrK7qY8J0=
+- provider: releases
+  file: build/learningoop.spiral.pdf
+  on:
+    tags: true
+  skip_cleanup: true
+  api_key:
+    secure: pRfu3fr35BzqQDi1ul0SubPSwO8zcyIidqLRZPz3XIrH4qoy1Zgnq785dmB7ziNQqH+VJyh7askSFY3JLxL0d4P0eUgj2ZDIOhJsUQQ/ihevOBWbxlMOoEPjQfzA11l8WrNCQ566KrcYiISRi7bCg698kPTWSRwOmmvqXOJe5zGkuUbVmMNUV2oxaNV4JC8kVyVWHYy0nNMLEX/hzRZRh1+8K34/ds+fZ7irLrbDWMbKGHCyuLCSqv+zJJdu99nWLTclrCxFzK4DEHaMlFiO7wkUpyQLwZ38EDnb3E7iv045jSqCx3XB+DMRG1Da2/9BIXl0mho5ELdEvfGVAbjI2no5FWd0H1cs4/banAePCFnM7ZscJBaPWgVajB7EzrcADJUoxpmU6+6n1aIC3CnjscfAHqSAKGv8CO/Jh+Uirc8ATRpSqa73f2Nnj9tRCqwCOnFOCEzu0w5l3Ppz2Qpif04P+QbebZehSVaBJ4W01R2i8Rac3IuZDhZVaek1X24HFxUOd/rvHpbhz8eeANdnsWCTkAm+0sD+iKsWKICRMxFZfCK/SPldAcjXZsOsEMTqfx7ZWyCc7GeesQWcmW+z3shziyQd9tdeArJWLwacly3hH3WeyuUD5JyPF9klvDBtHgTVajdU4yp+3oXsrtTmetnBz+RESxQGdLgZRlQBQog=</code></pre><figcaption></figcaption></figure>
+
+
+<p>
+The expression file: <code>build/learningoop.pdf</code> identifies the file produced by <code>make</code>. Pay attention because spiralbook produces learningoop.spiral.pdf
+</p>
+<p>
+The expression 
+</p><figure><pre><code>  on:
+    tags: true</code></pre><figcaption></figcaption></figure>
+
+<p>
+expresses the fact that the script will only trigger for tagged releases.
+</p>
+<p>
+Note: We should add how we generated the key. It is not your bintray key. Probably travis encrypt your github token key. 
+</p>
+<h4>How to add a new released file in your git hub account </h4>
+
+<p>
+To release a pdf that will be stored on github in the booklet repository, we should issue an annotated tag as follow:
+</p>
+<figure><pre><code>git tag -a v1.0-Pharo50
+git push --tags</code></pre><figcaption></figcaption></figure>
+
+<h3>Conclusion</h3>
+
+<p>
+Now you are ready to manage and automatically build documents in various formats.
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2>Deploy your html books using Travis and Github Pages</h2>
+
+<p>
+Not available
+</p>
+<p>
+First of all, be sure you have a <a href="">github</a> account and <a href="">travis</a> one if possible. As explained for setting up Travis and Bintray, you will enable travis integration from your github repository containing your html files.
+</p>
+<p>
+Next step is to create some files which will be used during the deployment.
+</p>
+<p>
+Let's start by creating a <code>Makefile</code> at the top level of your repository. 
+</p>
+<p>
+That is the content of this file:
+</p>
+<figure><pre><code>SITE=_result/html
+
+.pillar:
+	git clone https://github.com/pillar-markup/pillar.git .pillar -b dev-7
+	cd .pillar &amp;&amp; ./scripts/build.sh &amp;&amp; cd ..
+
+build:	.pillar
+	.pillar/build/pillar build html
+
+deploy:	build
+	./scripts/prepare_for_deploy.sh $(SITE)
+	cd $(SITE) &amp;&amp; git push -f origin HEAD:gh-pages
+
+
+clonedeploy:
+	rm -rf $(SITE)
+	git clone -b master `git config --get remote.origin.url` $(SITE)
+
+
+clean:
+	rm -rf $(SITE)</code></pre><figcaption></figcaption></figure>
+
+
+<p>
+This file will be used by travis to install the last version of pillar and generate your book in html format. After that, it delegates the deployment to another script.
+</p>
+
+<p>
+No changes needed for this file. Perhaps you will have to modify the branch (part after -b) from which pillar is cloned, in order to have the latest version.
+</p>
+<p>
+The <code>gh-pages</code> branch will be automatically created, so you are not obliged to create it on github. The gh-pages branch is recognized by github to be a special branch on which 
+static html files can be stored in order to be served. So pushing the generated html files on that branch will provide you a site available at <code>https://&lt;git-username&gt;.github.io/&lt;your-repo-name&gt;/</code>.
+</p>
+
+<p>
+Now you will create the <code>scripts/prepare_for_deploy.sh</code> which is a bash file initializing a repository for your generated files.
+</p>
+<p>
+That file looks like: 
+</p>
+<figure><pre><code>#!/usr/bin/env bash
+# Bash3 Boilerplate. Copyright (c) 2014, kvz.io
+
+set -o errexit
+set -o pipefail
+set -o nounset
+# set -o xtrace
+
+# Set magic variables for current file &amp; dir
+__dir=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)&quot; &amp;&amp; pwd)&quot;
+__file=&quot;${__dir}/$(basename &quot;${BASH_SOURCE[0]}&quot;)&quot;
+__base=&quot;$(basename ${__file} .sh)&quot;
+__root=&quot;${__dir}/..&quot; # &lt;-- change this as it depends on your app
+
+
+# The repository send as parameter where html files are located
+if [ $# -lt 1 ]
+then 
+  echo &quot;parameter missing: Repository name expected&quot;
+else 
+  __site=$1
+fi
+
+cd ${__root}/${__site}
+touch .nojekyll
+git init
+git add .
+git commit -m &quot;Generated from source branch: `cd ${__root} &amp;&amp; git log -1 --oneline`&quot;
+git remote add origin &quot;https://$GH_TOKEN@github.com/${TRAVIS_REPO_SLUG}.git&quot;
+echo &quot;GH PAGES Setup finished&quot;</code></pre><figcaption></figcaption></figure>
+
+
+<p>
+The <strong>TRAVIS_REPO_SLUG</strong> variable contains your github username and repository name like this <strong>toto/book_pillar</strong>.
+</p>
+<p>
+An important thing which has to be done here is the generation of the token, which is needed by travis.
+</p>
+<p>
+This token will be encrypted and will be stored in a <code>.travis.yml</code> file.
+</p>
+<p>
+You will need to add these instructions to your existing <code>.travis.yml</code> file. Those lines will trigger the deployment process and will install some necessary librairies for pillar installation :
+</p>
+<figure><pre><code>language: c
+addons:
+  apt:
+    packages:
+    - libasound2:i386
+    - lib32z1
+    - lib32bz2-1.0
+    - libssl1.0.0:i386
+    - libfreetype6:i386
+script:
+- if [[ ${TRAVIS_BRANCH} == &quot;master&quot; ]]; then make deploy; fi</code></pre><figcaption></figcaption></figure>
+
+
+<h3>Generate the token in Github</h3>
+
+<p>
+Go to your <a href="">github</a> account, go to the Developer Settings (located in general settings of your account).
+</p>
+<p>
+In Personal access tokens, click on Generate new token. Provide a description and generate it. Copy it in a safe file, you will have to encrypt it. And for every new book repository you can use 
+the same token, you will just need to encrypt it.
+</p>
+<p>
+Now just use this command at the top route of your repository:
+</p>
+<figure><pre><code>$ travis encrypt GH_TOKEN=&lt;your_token&gt; --add env.global</code></pre><figcaption></figcaption></figure>
+
+<p>
+This will add the encrypted token to your <code>.travis.yml</code> file.
+</p>
+
+<h3>Recap</h3>
+
+<p>
+Now you can commit and push your repo. 
+</p>
+<p>
+Before doing that, just let us check some points
+</p>
+<ul>
+<li>You have the Makefile at the top level of your repository</li>
+<li>The prepare_for_deploy.sh file in scripts directory <em>scripts/prepare_for_deploy.sh</em></li>
+<li>Travis integration is enabled on github</li>
+<li>You have an encrypted token in <code>.travis.yml</code> labelled <strong>GH_TOKEN</strong></li>
+</ul>
+
+<p>
+If so, you can safely do your commit. And enjoy travis integration. Your book will be served on <code>https://&lt;git-username&gt;.github.io/&lt;your-repo-name&gt;/</code>
+</p>
+<p>
+<strong>Pay attention to have an index file in your repository and set base_url to your repository name</strong> (pillar.conf)
+
+</p>
+<h2>Pillar cheatsheet</h2>
+<a id="chacheat"></a>
+<h4>Headings</h4>
+<table style="border: solid thin"><tr><td style="text-align: left"><code>! Heading</code></td>
+<td>Heading 1</td>
+<td style="text-align: left"><code>!!! Heading</code></td>
+<td>Heading 3</td>
+</tr>
+<tr><td style="text-align: left"><code>!! Heading</code></td>
+<td>Heading 2</td>
+<td style="text-align: left"><code>!!!! Heading</code></td>
+<td>Heading 4</td>
+</tr>
+</table>
+
+
+<h4>Anchors and links </h4>
+<table style="border: solid thin"><tr><td style="text-align: left"><code>@anchor</code></td>
+<td>anchor</td>
+</tr>
+<tr><td style="text-align: left"><code>*@Internal Link*</code></td>
+<td>Internal link</td>
+</tr>
+<tr><td style="text-align: left"><code>*http://www.pharo.org*</code></td>
+<td>External link</td>
+</tr>
+<tr><td style="text-align: left"><code>*Pharo&gt;http://www.pharo.org*</code></td>
+<td>Alias external link</td>
+</tr>
+</table>
+
+<h4>Lists</h4>
+<table style="border: solid thin"><tr><td style="text-align: left"><code>-bullet</code></td>
+<td>Creates one bullet</td>
+</tr>
+<tr><td style="text-align: left"><code>#numbered</code></td>
+<td>Creates one numbered item</td>
+</tr>
+<tr><td style="text-align: left"><code>;description :definition</code></td>
+<td>Creates a description definition item</td>
+</tr>
+</table>
+
+
+
+<h4>Formatting</h4>
+<table style="border: solid thin"><tr><td><code>&quot;&quot;bold&quot;&quot;</code></td>
+<td><strong>bold</strong></td>
+</tr>
+<tr><td><code>''italic''</code></td>
+<td><em>italic</em></td>
+</tr>
+<tr><td><code>==monospaced==</code></td>
+<td><code>monospaced</code></td>
+</tr>
+<tr><td><code>--strikethrough--</code></td>
+<td><s>strikethrough</s></td>
+</tr>
+<tr><td><code>@@subscript@@</code></td>
+<td><sub>subscript</sub></td>
+</tr>
+<tr><td><code>^^superscript^^</code></td>
+<td><sup>superscript</sup></td>
+</tr>
+<tr><td><code>__underlined__</code></td>
+<td><u>underlined</u></td>
+</tr>
+</table>
+
+<p>
+Characters to be escaped using <code>\</code> are
+</p><figure><pre><code>| characters |
+characters := (PRPillarGrammar markups inject: Set new into: [ :chars :markup | chars addAll: markup. chars]) copyWithout: Character space.
+stream nextPutAll: '[[['; cr.
+characters do: [:char | stream nextPut: char] separatedBy: [ stream nextPutAll: ', ' ].
+stream cr; nextPutAll: ']]]'; cr.</code></pre><figcaption></figcaption></figure>
+
+<table style="border: solid thin"><tr><td><code>%</code> commented line</td>
+<td>each line starting with <code>%</code> is ignored</td>
+</tr>
+</table>
+
+
+<h4>Pictures</h4>
+<pre>+Caption.&gt;file://figures/pharo-logo.png|width=50|label=pharoLogo+</pre>
+<h4>Tables</h4>
+
+<table style="border: solid thin"><tr><td><code>|! Column1 | Column2</code></td>
+<td>Two column header</td>
+</tr>
+<tr><td><code>||</code></td>
+<td>centered</td>
+</tr>
+<tr><td><code>|{ left</code></td>
+<td>left</td>
+</tr>
+<tr><td><code>|} right</code></td>
+<td>right</td>
+</tr>
+</table>
+
+
+<h4>Annotated paragraphs</h4>
+<table style="border: solid thin"><tr><td>==@@note==</td>
+<td>Produce a note paragraph</td>
+</tr>
+<tr><td>==@@todo==</td>
+<td>Produces a todo</td>
+</tr>
+</table>
+
+<h4>Code blocks</h4>
+
+<pre>[[[
+self foo bar
+]]]</pre>
+<pre>[[[label=foobar|caption=My code block that works|language=smalltalk
+self foo bar
+]]]</pre>
+<h4>Raw</h4>
+<figure><pre><code>{{{latex:
+latex code here
+}}}
+{{{html:
+plain html here
+}}}</code></pre><figcaption></figcaption></figure>
+
+      </section>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="_support/html/js/bootstrap.min.js"></script>
+
+    <!-- Syntax highlighting of code blocks -->
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <!-- Prettify annotated paragraphs-->
+    <script src="_support/html/js/annotated-paragraphs.js"></script>
+
+  </body>
+</html>

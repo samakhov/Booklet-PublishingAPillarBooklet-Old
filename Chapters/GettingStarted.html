@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Publishing Documents with Pillar 7.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Highlight js -->
+    <link rel="stylesheet" href="_support/html/highlightjs/styles/default.css">
+    <link rel="stylesheet" href="_support/html/css/highlight-commands.css">
+    <script src="_support/html/highlightjs/highlight.pack.js"></script>
+    <script src="_support/html/js/highlight-commands.js"></script>
+
+    <!-- Bootstrap -->
+    <link href="_support/html/css/bootstrap.min.css" rel="stylesheet">
+    <link href="_support/html/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="_support/html/css/square-braket-associates.css" rel="stylesheet">
+    <style>
+/*        .container { max-width: 55em; } */
+    </style>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+    <div class="container text-justify">
+      <section>
+        <h1>Publishing Documents with Pillar 7.0</h1>
+        <div class="attribution">Stéphane Ducasse and Guillermo Polito and Asbath Sama</div>
+
+        <h2>Installing Pillar and Creating a Booklet </h2>
+<a id="chagettingstarted"></a><p>
+In this part we will describe the complete setup. We will show how to install Pillar, create a book and version your document  in a git repository to version the booklet files. The example used for this is this booklet itself.
+The current installation refers to Pillar 70. 
+</p>
+<p>
+We take as hypothesis that you want to version your document on gihub but Pillar does not care about this. 
+Now in the next chapter we will explain how to use github service integration. Such services only work with github.
+</p>
+<h3>Installing Pillar</h3>
+<p>
+Installing pillar is simple. Now since Pillar can be used to generate different families of documents, once you download you should install the template you want to use. But let us get started!
+</p>
+<figure><pre><code>$ mkdir Pillar
+$ cd Pillar
+$ git clone git@github.com:pillar-markup/pillar.git -b newpipeline
+$ ./pillar/scripts/build.sh</code></pre><figcaption></figcaption></figure>
+
+<p>
+This will create a <code>build</code> directory in the working directory and build pillar in there. You can then proceed to install pillar where you want in your home directory. Here we place it as <code>.pillar</code> in our home directory.
+</p>
+<figure><pre><code>$ mv Pillar ~/.pillar</code></pre><figcaption></figcaption></figure>
+
+<p>
+Note that if you want to generate PDF you should have a running installation of LaTex. We will show in subsequent chapter that you 
+can setup a travis job to compile and generate the PDF for you on the Cloud.
+</p>
+<h3>Setting up your environment</h3>
+
+<p>
+Once you downloaded pillar and moved it to your home directory, then add that directory to the <code>PILLAR_HOME</code> and <code>HOME</code> environment variables, for example, by modifying your .bashrc with
+</p>
+<figure><pre><code>export PILLAR_HOME=&quot;$HOME/.pillar/build&quot;
+export PATH=&quot;$PATH:$PILLAR_HOME&quot;</code></pre><figcaption></figcaption></figure>
+
+<p>
+Now you should be able to create a booklet for example. 
+</p>
+<figure><pre><code>$ pillar archetype book
+$ pillar build pdf</code></pre><figcaption></figcaption></figure>
+
+<p>
+It will build a book in the folder <code>_result</code>. 
+</p>
+<h3>Creating your own versioned booklet</h3>
+
+<p>
+We imagine that you want to write a little booklet as the one you are currently reading and that this booklet will be stored on github. 
+</p>
+<h4>Cloning a git repository</h4>
+
+<p>
+Let us clone the repository which is empty right now.
+</p><figure><pre><code>git clone git@github.com:SquareBracketAssociates/Booklet-PublishingAPillarBooklet.git</code></pre><figcaption></figcaption></figure>
+
+<figure><pre><code>cd Booklet-PublishingAPillarBooklet</code></pre><figcaption></figcaption></figure>
+
+
+
+<h4>Selecting and Installing Book</h4>
+<p>
+Pillar come with several templates and you can define your own using mustache (see the book Entreprise Pharo: a Web perspective).
+By default Pillar offers the following templates:
+</p>
+<ul>
+<li>Book. This is the template used in recent Pharo books and booklets. </li>
+<li>Presentation. These are the beamer templates used for example in the Pharo mooc. </li>
+<li>Basic-latex. This template is good to generate basic reports. What is nice is that you do not need the latest version of latex packages. </li>
+<li>Welcome. This template is to teach how to build templates. </li>
+</ul>
+
+<p>
+To install a template you should indicate it to pillar using the archetype command as follows: 
+</p>
+<figure><pre><code>pillar archetype book</code></pre><figcaption></figcaption></figure>
+
+<p>
+Then you can compile the default template to check that it effectively worked. 
+</p>
+<figure><pre><code>pillar build pdf </code></pre><figcaption></figcaption></figure>
+
+<p>
+produces a book in the folder <code>_result</code>. Indeed the folder Chapters and figures contain some samples.
+</p>
+<h4>Versioning your book</h4>
+
+<p>
+Now to version simply you book you should version all the files except <code>_result</code>. 
+Later we will show you how to add travis and bintray support for automatic compilation so that you do not need to install locally LaTeX on your machine. 
+</p>
+<figure><pre><code>$ git add pillar.conf
+$ git add _support
+$ git add Chapters
+$ git add book.pillar</code></pre><figcaption></figcaption></figure>
+
+<h4>Adding a .gitignore</h4>
+
+<p>
+Not all the downloaded files are worth versionning. We suggest the following .gitignore configuration. 
+</p>
+<figure><pre><code>more .gitignore
+&gt;&gt;&gt;
+/_result/</code></pre><figcaption></figcaption></figure>
+
+<p>
+You can remove the folder figures and the chapter samples. 
+Now you are ready to commit your files. 
+</p>
+
+<h3>Adapting Pillar to your Book</h3>
+<p>
+Now we are ready to produce your own book. For this we edit some configuration files, in addition to edit some chapters. We focus on the configuration of files.
+</p>
+<p>
+You need to edit two files:
+</p><ul>
+<li>pillar.conf which defines all the concerns such as author name, book tile but also the book template.</li>
+<li>book.pillar which lists the chapters in order and is the place to add some glue text.</li>
+</ul>
+
+<h4>Editing pillar.conf </h4>
+
+<p>
+You can start to edit the file <code>pillar.conf</code>.
+The main points are:
+</p><ul>
+<li>title: </li>
+<li>attribution: Give the author of the booklet.</li>
+<li>chapters. Here you should give the list of the files. You can put them in separate folders or not. </li>
+</ul>
+
+<p>
+Here is the <code>pillar.conf</code> file of this booklet
+</p><figure><pre><code>{
+  &quot;title&quot;: &quot;Publishing a Pillar Booklet&quot;,
+  &quot;attribution&quot;: &quot;StéphaneDucasse&quot;,
+  &quot;series&quot;: &quot;Square Bracket tutorials&quot;,
+  &quot;keywords&quot;: &quot;project template, Pillar, Pharo, Smalltalk&quot;,
+  
+  &quot;outputDirectory&quot;: &quot;build&quot;,
+  &quot;mainDocument&quot;: &quot;book&quot;,
+  &quot;inputFile&quot;:&quot;book.pillar&quot;,
+  &quot;latexTemplate&quot;: &quot;_support/templates/main.latex.mustache&quot;,
+  &quot;latexChapterTemplate&quot;: &quot;_support/templates/chapter.latex.mustache&quot;,
+  &quot;htmlTemplate&quot;: &quot;_support/templates/html.mustache&quot;,
+  &quot;htmlChapterTemplate&quot;: &quot;_support/templates/html.mustache&quot;,
+  &quot;newLine&quot;: #unix,
+  &quot;latexWriter&quot;: #'latex:sbabook',
+  &quot;htmlWriter&quot;: #html
+}</code></pre><figcaption></figcaption></figure>
+
+<p class="todo">we should check if we really need outputDirectory: build?</p>
+<h4>Editing book.pillar</h4>
+<p>
+Now we will edit the file <code>book.pillar</code> (the file listed in <code> &quot;mainDocument&quot;: &quot;book&quot;</code> in the <code>pillar.conf</code> file).
+</p>
+<p>
+We can simply add text there and file to be included using the Pillar command ==${inputFile:nameOfTheFIle.pillar}$ as follows:
+</p><figure><pre><code>$ more book.pillar
+
+The current document is a little tutorial to show you how to begin with the creation of booklet.
+It describes the installation, customisation and integration with travis and bintray online services.
+${inputFile:Chapters/GettingStarted.pillar}$
+
+${inputFile:Chapters/TravisBintray.pillar}$</code></pre><figcaption></figcaption></figure>
+
+
+<h3>Conclusion</h3>
+
+<p>
+Now you are ready to write your document in Pillar and get them exported in PDF and HTML. 
+</p>
+
+      </section>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="_support/html/js/bootstrap.min.js"></script>
+
+    <!-- Syntax highlighting of code blocks -->
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <!-- Prettify annotated paragraphs-->
+    <script src="_support/html/js/annotated-paragraphs.js"></script>
+
+  </body>
+</html>
